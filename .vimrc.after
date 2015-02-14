@@ -1,0 +1,124 @@
+set gfn=Menlo:h12
+set wrap                            " to break lines when excede the margin screen
+set listchars=""                    " Reset the listchars
+set listchars=tab:\ \               " a tab should display as "  ", trailing whitespace as " "
+set listchars+=extends:>            " The character to show in the last column when wrap is
+                                    " off and the line continues beyond the right of the screen
+set listchars+=precedes:<           " The character to show in the last column when wrap is
+                                    " off and the line continues beyond the right of the screen
+let g:gist_clip_command = 'pbcopy'  " to copy gist into the ctrl + c buffer
+
+set guioptions-=r                   " Removes right hand scroll bar
+set go-=L                           " Removes left hand scroll bar
+
+
+set expandtab ts=4 sw=4 ai          " eb indentation
+
+let g:ctrlp_by_filename = 1
+let g:ctrlp_cmd = 'CtrlPMRU'
+noremap <leader>- :tabm -1<CR>
+noremap <leader>+ :tabm 1<CR>
+noremap <leader>f :NERDTreeFind<CR>
+noremap <leader>c :CopyFilePath<CR>
+
+function! CopyFilePath()
+    let @+ = expand("%:p")
+endfunction
+
+command! CopyFilePath call CopyFilePath()
+
+function! CleanScript()
+    %s/^M//g
+    %s/^[//g
+    %s/\[K//g
+    %s/^H//g
+endf
+function! UnixFormat()
+    set filetype=unix
+endfunction
+
+command! UnixFormat call UnixFormats()
+
+"set fuopt+=maxhorz                  " horizontal max length
+"let g:smart_display_opts = {'guifg': 'White', 'guibg': 'Red', 'column' : 40 }
+
+let g:lightline = {
+      \ 'colorscheme': 'wombat',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'branch', 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'component_function': {
+      \   'branch':   'BranchName',
+      \   'readonly': 'ReadonlyFile',
+      \   'modified': 'ModifiedFile',
+      \   'filename': 'CustomFileName'
+      \ },
+      \ 'separator': { 'left': '>', 'right': '>' },
+      \ 'subseparator': { 'left': '>', 'right': '>' }
+      \ }
+
+function! CustomFileName()
+  return ('' != ReadonlyFile() ? ReadonlyFile() . ' ' : '') .
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+        \  &ft == 'unite' ? unite#get_status_string() :
+        \  &ft == 'vimshell' ? vimshell#get_status_string() :
+        \ '' != expand('%:p') ? expand('%:p') : '[nothing there]') .
+        \ ('' != ModifiedFile() ? ' ' . ModifiedFile() : '')
+endfunction
+
+function! ModifiedFile()
+  if &modified
+    return '☣'
+  endif
+
+  return ''
+endfunction
+
+function! ReadonlyFile()
+
+  if &readonly
+    return '☠'
+  endif
+
+  return ''
+endfunction
+
+function! BranchName()
+  if exists("*fugitive#head")
+    let _ = fugitive#head()
+    return strlen(_) ? '['._.']♆' : ''
+  endif
+
+  return ''
+endfunction
+
+function! DoPrettyXML()
+  " save the filetype so we can restore it later
+  let l:origft = &ft
+  set ft=
+  " delete the xml header if it exists. This will
+  " permit us to surround the document with fake tags
+  " without creating invalid xml.
+  1s/<?xml .*?>//e
+  " insert fake tags around the entire document.
+  " This will permit us to pretty-format excerpts of
+  " XML that may contain multiple top-level elements.
+  0put ='<PrettyXML>'
+  $put ='</PrettyXML>'
+  silent %!xmllint --format -
+  " xmllint will insert an <?xml?> header. it's easy enough to delete
+  " if you don't want it.
+  " delete the fake tags
+  2d
+  $d
+  " restore the 'normal' indentation, which is one extra level
+  " too deep due to the extra tags we wrapped around the document.
+  silent %<
+  " back to home
+  1
+  " restore the filetype
+  exe "set ft=" . l:origft
+endfunction
+command! PrettyXML call DoPrettyXML()
+color codeschool

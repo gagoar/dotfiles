@@ -1,0 +1,21 @@
+inoremap {      {}<Left>
+inoremap (      ()<Left>
+inoremap [      []<Left>
+"inoremap {<CR>  {<CR>}<Esc>O
+" map CTRL-E to end-of-line (insert mode)
+imap <C-e> <esc>$i<right>
+" map CTRL-A to beginning-of-line (insert mode)
+imap <C-a> <esc>0i
+nnoremap <D-j> :tabprevious<CR>
+nnoremap <D-k> :tabnext<CR>
+cnoremap <C-e>  <End>
+cnoremap <C-a>  <Home>
+cnoremap <C-f>  <Right>
+cnoremap <C-d>  <Delete>
+cnoremap <M-b>  <S-Left>
+cnoremap <M-f>  <S-Right>
+cnoremap <M-d>  <S-right><Delete>
+cnoremap <Esc>b <S-Left>
+cnoremap <Esc>f <S-Right>
+cnoremap <Esc>d <S-right><Delete>
+cnoremap <C-g>  <C-c>
